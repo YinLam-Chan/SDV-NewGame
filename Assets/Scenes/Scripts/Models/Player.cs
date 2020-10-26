@@ -1,15 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SQLite4Unity3d;
 
 public class Player
 {
     //attributes of a player
-    private string email;
+    private string username;
     private string password;
-    private Location location;
+    private int locationID;
+    private int score;
 
-    public string Email { get => email; set => email = value; }
+    [PrimaryKey, AutoIncrement]
+    public int PlayerID { get; set; }
+    public string Username { get => username; set => username = value; }
     public string Password { get => password; set => password = value; }
-    public Location Location { get => location; set => location = value; }
+    public int LocationID { get => locationID; set => locationID = value; }
+    public int Score { get => score; set => score = value; }
+
+    public void SavePlayerLocation()
+    {
+        SaveGame.SavePlayerLocation(this);
+    }
+
+    public void LoadPlayerLocation()
+    {
+        Player data = SaveGame.LoadPlayerLocation();
+
+        Username = data.Username;
+        Password = data.Password;
+        LocationID = data.LocationID;
+        Score = data.Score;
+    }
 }

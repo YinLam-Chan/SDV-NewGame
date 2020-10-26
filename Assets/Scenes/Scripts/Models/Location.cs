@@ -1,49 +1,59 @@
-﻿using System.Collections;
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using SQLite4Unity3d;
 
-public class Location
+public class Location 
 {
-    //attributes of a location
     private string locationName;
     private string story;
-    //private image locationImage;
 
-    private Dictionary<string, Location> Locations = new Dictionary<string, Location>();
+    // what about location asessts??
 
+    // No longer need this because it is implemented as ToFrom
+    // private Dictionary<string, Location> Locations = new Dictionary<string, Location>();
+    [PrimaryKey, AutoIncrement]
+    public int LocationId { get; set; }
     public string LocationName { get => locationName; set => locationName = value; }
     public string Story { get => story; set => story = value; }
-    //public image LocationImage { get => locationImage; set => locationImage = value; }
 
-
-
-    //method to update the next location as current location
-    public void updateLocation(string pDirection, string pLocationName, string pStory)
+    public void addLocation(string pDirection, string pName, string pStory)
     {
-        Location nextLocation = new Location
-        {
-            LocationName = pLocationName,
-            Story = pStory
-        };
+        // Store location now creates and stores a location
+        // in Sqlite.
 
-        Locations.Add(pDirection, nextLocation);
+        //Location newLocation = new Location
+        //{
+        //    Name = pName,
+        //    Story = pStory
+        //};
+
+        Location newLocation = GameModel.ds.storeNewLocation(  pName, pStory);
+
+
+       addDirection(pDirection, newLocation);
+
     }
 
-    //player can choose to go back to the pervious location
-    public void updateLocation(string pDirection, Location pLocation)
+    public void addDirection(string pDirection, Location toLocation)
     {
-        Locations.Add(pDirection, pLocation);
+         GameModel.ds.storeFromTo(LocationId, toLocation.LocationId, pDirection);
     }
-
+    public  void addLocation(string pDirection, Location pLocation)
+    {
+        addDirection(pDirection, pLocation);
+    }
 
     public Location getLocation(string pDirection)
     {
         Location thisLocation = null;
 
-        if (!Locations.TryGetValue(pDirection, out thisLocation))
-        {
-            Debug.Log("Do not understand");
-        }
+        //if(! Locations.TryGetValue(pDirection, out thisLocation)) {
+        //    Debug.Log(" Bad location");
+        //}
+        ToFrom tf = GameModel.ds.GetToFrom(LocationId, pDirection);
+        if(tf != null)
+            thisLocation = GameModel.ds.GetLocation(tf.ToID);
 
         return thisLocation;
     }

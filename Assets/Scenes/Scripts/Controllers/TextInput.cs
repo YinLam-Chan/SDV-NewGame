@@ -2,36 +2,37 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class TextInput : MonoBehaviour
 {
-    
+    InputField input;
     InputField.SubmitEvent se;
     InputField.OnChangeEvent ce;
     public Text output;
-    public InputField input;
+    private string Username = "";
 
     // Start is called before the first frame update
     void Start()
     {
-       // Debug.Log(output.text);
-       output.text = GameModel.currentLocation.LocationName + "\n" + GameModel.currentLocation.Story;
+        Username = GameModel.currentPlayer != null ? "Hello " + GameModel.currentPlayer.Username + ".\n" : "";
+        output.text = Username + GameModel.currentLocation.LocationName + "\n" + GameModel.currentLocation.Story;
 
-        //input = this.GetComponent<InputField>();
-        //se = new InputField.SubmitEvent();
-        //se.AddListener(SubmitInput);
-        //input.onEndEdit = se;
+        input = this.GetComponent<InputField>();
+        se = new InputField.SubmitEvent();
+       se.AddListener(SubmitInput);
+       input.onEndEdit = se;
     }
 
-    public void SubmitInput()
+    public void SubmitInput(string arg0)
     {
         string currentText = output.text;
 
         CommandProcessor aCmd = new CommandProcessor();
-        output.text = aCmd.Parse(input.text);
+        output.text = Username + aCmd.Parse(input.text);
 
         input.text = "";
-        //input.ActiveInputField();
+        input.ActivateInputField();
     }
 
     public void ChangeInput(string arg0)
