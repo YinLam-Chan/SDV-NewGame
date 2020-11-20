@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public static class GameModel
 {
-    
+    public static Text PlayerHereDisplay;
 
     private static string name;
 
@@ -23,8 +23,10 @@ public static class GameModel
     public static Text scoreDisplay;
     public static DataService ds = new DataService("WorldAdventure.db");
 
-    //Possible scenarios of password checking
-    public enum PasswdMode
+    public static JSONDropService jsDrop = new JSONDropService { Token = "0031b110-baf3-4988-86c3-122c2a770b46" };
+
+//Possible scenarios of password checking
+public enum PasswdMode
     {
         NeedUsername,
         NeedPassword,
@@ -45,6 +47,7 @@ public static class GameModel
                 result = GameModel.PasswdMode.OK;
                 GameModel.currentPlayer = aPlayer;
                 GameModel.currentLocation = GameModel.ds.GetPlayerLocation(GameModel.currentPlayer);
+                
             }
             else
             {
@@ -61,13 +64,93 @@ public static class GameModel
     public static void RegisterPlayer(string pUsername, string pPassword)
     {
         GameModel.currentPlayer = GameModel.ds.storeNewPlayer(pUsername, pPassword, GameModel.currentLocation.LocationId, 0);
+        networkRegister();
     }
 
+    //if the player didn't exist, then register the player to the network
+    public static void networkRegister()
+    {
+        jsDrop.Create<Person, JsnReceiver>(new Person
+        {
+            Name = "UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+            Score = 0,
+            Password = "***************************",
+            LocationId = 1,
+        }, jsnReceiverCreateDel);
+    }
+
+    //create delegate, create a new player in network
+    public static void jsnReceiverCreateDel(JsnReceiver pReceived)
+    {
+        Debug.Log(pReceived.JsnMsg + " ..." + pReceived.Msg);
+        StorePlayer();
+        // To do: parse and produce an appropriate response
+    }
+
+    public static void jsnReceiverDel(JsnReceiver pReceived)
+    {
+        Debug.Log(pReceived.JsnMsg + " ..." + pReceived.Msg);
+        // To do: parse and produce an appropriate response
+    }
+
+    public static void jsnListReceiverDel(List<Person> pReceivedList)
+    {
+        GameModel.PlayerHereDisplay.text = "";
+        Debug.Log("Received items " + pReceivedList.Count);
+        foreach (Person lcReceived in pReceivedList)
+        {
+            Debug.Log("Received {" + lcReceived.Name + "," + lcReceived.Password + "," + lcReceived.Score.ToString() + "}");
+            GameModel.PlayerHereDisplay.text += lcReceived.Name + "\n";
+        }// for
+
+        // To do: produce an appropriate response
+    }
+
+    public static void jsnGetReceiverDel(JsnReceiver pReceived)
+    {
+        Debug.Log(pReceived.JsnMsg + " ..." + pReceived.Msg);
+        // To do: parse and produce an appropriate response
+    }
+
+    public static void jsnGetPlayerReceiverDel(JsnReceiver pReceived)
+    {
+        Debug.Log(pReceived.JsnMsg + " ..." + pReceived.Msg);
+        // To do: parse and produce an appropriate response
+        GameModel.PlayerHereDisplay.text = "";
+    }
+
+    public static void getPlayers()
+    {
+        jsDrop.Select<Person, JsnReceiver>("LocationID = " + GameModel.currentPlayer.LocationID, jsnListReceiverDel, jsnGetPlayerReceiverDel);
+    }
+
+
+
+    public static void StorePlayer()
+    {
+        jsDrop.Store<Person, JsnReceiver>(new List<Person>
+        {
+            new Person { Name = GameModel.currentPlayer.Username, Score = 0, Password = GameModel.currentPlayer.Password, LocationId = GameModel.currentLocation.LocationId }
+
+         }, jsnReceiverStoreDel);
+    }
+
+    //store dalegate, store it in the network
+    public static void jsnReceiverStoreDel(JsnReceiver pReceived)
+    {
+        Debug.Log(pReceived.JsnMsg + " ..." + pReceived.Msg);
+        getPlayers();
+    }
+    
+   
+
+    
 
     public static void SetupGame()
     {
         
         ds.CreateDB();
+        //createNetworkStorage
     }
 
     //the starting page when the player first arrive to the game

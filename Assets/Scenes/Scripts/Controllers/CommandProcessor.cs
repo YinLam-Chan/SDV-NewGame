@@ -83,6 +83,23 @@ public class CommandProcessor
                             strResult = GameModel.currentLocation.LocationName + "\n" + GameModel.currentLocation.Story;
                         }
                     }
+
+                    if (parts[1] == "west")
+                    {
+                        Debug.Log("You are going west");
+                        nextLocation = GameModel.currentLocation.getLocation("West");
+                        if (nextLocation == null)
+                        {
+                            strResult = "Sorry cannot go there" + "\n" + GameModel.currentLocation.LocationName + "\n" + GameModel.currentLocation.Story;
+                        }
+                        else
+                        {
+                            GameModel.currentLocation = nextLocation;
+                            GameModel.currentPlayer.LocationID = nextLocation.LocationId;
+
+                            strResult = GameModel.currentLocation.LocationName + "\n" + GameModel.currentLocation.Story;
+                        }
+                    }
                     break;
                 case "pick":
                     strResult = "Pick up something";
@@ -96,6 +113,7 @@ public class CommandProcessor
             ScoreManager Scorer = new ScoreManager();
             GameModel.currentPlayer = Scorer.applyScoreRule(GameModel.currentPlayer);
             GameModel.ds.storePlayer(GameModel.currentPlayer);
+
 
             return strResult;
 

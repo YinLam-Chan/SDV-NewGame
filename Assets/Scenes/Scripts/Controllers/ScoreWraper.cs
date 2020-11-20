@@ -11,6 +11,8 @@ public class ScoreWraper : MonoBehaviour
     void Start()
     {
         GameModel.scoreDisplay = scoreDisplayer;
+        ScoreManager Scorer = new ScoreManager();
+        GameModel.currentPlayer = Scorer.applyScoreRule(GameModel.currentPlayer);
     }
 
     // Update is called once per frame

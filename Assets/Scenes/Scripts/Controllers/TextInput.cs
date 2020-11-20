@@ -22,6 +22,7 @@ public class TextInput : MonoBehaviour
         se = new InputField.SubmitEvent();
        se.AddListener(SubmitInput);
        input.onEndEdit = se;
+        GameModel.getPlayers();
     }
 
     public void SubmitInput(string arg0)
@@ -33,6 +34,7 @@ public class TextInput : MonoBehaviour
 
         input.text = "";
         input.ActivateInputField();
+        GameModel.StorePlayer();
     }
 
     public void ChangeInput(string arg0)
